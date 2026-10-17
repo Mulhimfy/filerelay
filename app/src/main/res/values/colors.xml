@@ -1,0 +1,6 @@
+<resources>
+    <color name="window_bg">#F8F9FC</color>
+    <color name="ic_bg">#0B6BCB</color>
+    <color name="ic_send_bg">#1E9BE0</color>
+    <color name="ic_save_bg">#1E8E5A</color>
+</resources>
