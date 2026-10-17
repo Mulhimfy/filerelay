@@ -1,10 +1,12 @@
 package com.mulhimfy.filerelay
 
 import android.app.DownloadManager
+import android.content.ContentValues
 import android.content.Context
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import android.webkit.URLUtil
 import kotlinx.coroutines.Dispatchers
@@ -70,7 +72,7 @@ object Downloader {
     suspend fun start(ctx: Context, url: String): String = withContext(Dispatchers.IO) {
         val (name, mime) = probe(url)
         val finalName = uniqueName(name)
-        if (Build.VERSION.SDK_INT < 29 || Storage.hasAccess(ctx)) runCatching { Storage.relayDir.mkdirs() }
+        ensureRelayDir(ctx)
         val req = DownloadManager.Request(Uri.parse(url))
             .setTitle(finalName)
             .setDescription("FileRelay")
@@ -81,6 +83,24 @@ object Downloader {
         val id = dm(ctx).enqueue(req)
         Prefs.addDownload(ctx, id)
         finalName
+    }
+
+    /** DownloadManager won't create our subfolder itself; without file access, MediaStore can. */
+    private fun ensureRelayDir(ctx: Context) {
+        if (Build.VERSION.SDK_INT < 29 || Storage.hasAccess(ctx)) {
+            runCatching { Storage.relayDir.mkdirs() }
+            return
+        }
+        runCatching {
+            val values = ContentValues().apply {
+                put(MediaStore.MediaColumns.DISPLAY_NAME, "filerelay-folder-${System.nanoTime()}.bin")
+                put(MediaStore.MediaColumns.MIME_TYPE, BINARY)
+                put(MediaStore.MediaColumns.RELATIVE_PATH, "${Environment.DIRECTORY_DOWNLOADS}/${Storage.RELAY_FOLDER}")
+                put(MediaStore.MediaColumns.IS_PENDING, 1)
+            }
+            ctx.contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                ?.let { ctx.contentResolver.delete(it, null, null) }
+        }
     }
 
     private fun uniqueName(name: String): String {
