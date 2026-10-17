@@ -15,11 +15,11 @@ tap_text() {
   python3 - "$OUT/ui.xml" "$1" <<'PY' > "$OUT/tap.txt"
 import re, sys, xml.etree.ElementTree as ET
 root = ET.parse(sys.argv[1]).getroot()
-for n in root.iter("node"):
-    if n.get("text") == sys.argv[2] or n.get("content-desc") == sys.argv[2]:
-        a, b, c, d = map(int, re.findall(r"\d+", n.get("bounds")))
-        print((a + c) // 2, (b + d) // 2)
-        break
+hits = [n for n in root.iter("node") if n.get("text") == sys.argv[2] or n.get("content-desc") == sys.argv[2]]
+if hits:
+    # Last match is the lowest on screen (the bottom bar wins over same-named chips).
+    a, b, c, d = map(int, re.findall(r"\d+", hits[-1].get("bounds")))
+    print((a + c) // 2, (b + d) // 2)
 PY
   if [ -s "$OUT/tap.txt" ]; then adb shell input tap $(cat "$OUT/tap.txt"); echo "tapped $1"; else echo "NOT FOUND: $1"; fail=1; fi
 }

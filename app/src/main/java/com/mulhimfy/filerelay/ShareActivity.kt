@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -304,22 +305,22 @@ private fun SheetContent(
     }
     Spacer(Modifier.height(8.dp))
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        OutlinedButton(onClick = onShare, enabled = ready, modifier = Modifier.weight(1f)) {
+        OutlinedButton(onClick = onShare, enabled = ready, modifier = Modifier.weight(1f), contentPadding = SmallButtonPadding) {
             Icon(Icons.Filled.Share, null, Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(6.dp))
-            Text("Share")
+            Text("Share", maxLines = 1)
         }
-        OutlinedButton(onClick = onSave, enabled = ready && !saved, modifier = Modifier.weight(1f)) {
+        OutlinedButton(onClick = onSave, enabled = ready && !saved, modifier = Modifier.weight(1f), contentPadding = SmallButtonPadding) {
             Icon(if (saved) Icons.Filled.Check else Icons.Filled.Download, null, Modifier.size(ButtonDefaults.IconSize))
             Spacer(Modifier.width(6.dp))
-            Text(if (saved) "Saved" else "Save")
+            Text(if (saved) "Saved" else "Save", maxLines = 1)
         }
         val single = items?.singleOrNull()
         if (single != null) {
-            OutlinedButton(onClick = { onOpen(single) }, modifier = Modifier.weight(1f)) {
+            OutlinedButton(onClick = { onOpen(single) }, modifier = Modifier.weight(1f), contentPadding = SmallButtonPadding) {
                 Icon(Icons.Filled.Visibility, null, Modifier.size(ButtonDefaults.IconSize))
                 Spacer(Modifier.width(6.dp))
-                Text("Open")
+                Text("Open", maxLines = 1)
             }
         }
     }
@@ -338,6 +339,8 @@ private fun SheetContent(
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
+
+private val SmallButtonPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
 
 @Composable
 private fun SheetRow(item: FileItem, onClick: () -> Unit) {
